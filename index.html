@@ -14,8 +14,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
-  :root{--leaf:#1C5D3A;--leaf-deep:#123F28;--leaf-soft:#2E7A4E;--turmeric:#E6A11C;--tamarind:#9C3B22;
+  :root{--leaf:#1C5D3A;--leaf-deep:#123F28;--leaf-soft:#2E7A4E;--turmeric:#E6A11C;--tamarind:#9C3B22;--olive:#7A6A1F;
     --steel:#AEB7C2;--steel-d:#717C89;--steel-l:#E7EBF0;--paper:#F6F1E4;--paper-2:#FBF7EC;--cloud:#FFFFFF;
     --ink:#231D11;--ink-soft:#5B5340;--shadow:0 18px 40px -22px rgba(18,63,40,.45);
     --serif:'Fraunces',Georgia,serif;--sans:'Hanken Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;}
@@ -31,13 +32,18 @@
   .brand .sub{font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--turmeric);font-weight:600;margin-top:6px}
   .tag{position:relative;z-index:1;margin-top:14px;font-size:15px;color:#DCEBE0;max-width:46ch}.tag b{color:#fff;font-weight:600}
   .card{background:var(--cloud);border-radius:20px;padding:20px 18px;margin-top:22px;box-shadow:0 10px 28px -20px rgba(18,63,40,.35);border:1px solid rgba(28,93,58,.08)}
+  .cardhead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
   .eyebrow{font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--leaf-soft);font-weight:700}
   .q-title{font-family:var(--serif);font-size:21px;font-weight:600;margin:4px 0 2px;letter-spacing:-.01em}
   .q-note{font-size:13px;color:var(--ink-soft);margin-bottom:14px}
+  .resetall{flex:none;font-family:var(--sans);font-size:12px;font-weight:700;color:var(--tamarind);background:#FBEAE3;border:none;border-radius:30px;padding:7px 12px;cursor:pointer}
+  .resetall:active{transform:scale(.96)}
   .block{margin-top:24px}.block:first-child{margin-top:6px}
-  label.lab{display:block;font-weight:700;font-size:14px;margin-bottom:10px}
+  .labrow{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
+  label.lab{display:block;font-weight:700;font-size:14px}
   label.lab span{font-weight:500;color:var(--ink-soft);font-size:12.5px}
-  .rowtop{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .reset{flex:none;font-size:11.5px;font-weight:700;color:var(--steel-d);background:none;border:none;cursor:pointer;padding:3px 6px;border-radius:8px}
+  .reset:hover{color:var(--tamarind)}
   .allbtn{font-family:var(--sans);font-size:12.5px;font-weight:700;color:var(--leaf-deep);background:var(--paper-2);border:1.5px solid rgba(28,93,58,.25);border-radius:30px;padding:6px 12px;cursor:pointer}
   .allbtn:active{transform:scale(.96)}
   .chips{display:flex;flex-wrap:wrap;gap:8px}
@@ -53,8 +59,15 @@
   .switch{width:48px;height:28px;border-radius:30px;background:var(--steel);position:relative;flex:none;transition:background .18s}
   .switch::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:left .18s}
   .toggle.on .switch{background:var(--leaf-soft)}.toggle.on .switch::after{left:23px}
-  input.notes,select.sel{width:100%;font-family:var(--sans);font-size:14px;color:var(--ink);background:var(--paper-2);border:1.5px solid rgba(35,29,17,.12);border-radius:12px;padding:11px 14px;margin-top:10px}
+  .microw{display:flex;gap:8px;align-items:stretch;margin-top:10px}
+  input.notes,select.sel{flex:1;width:100%;font-family:var(--sans);font-size:14px;color:var(--ink);background:var(--paper-2);border:1.5px solid rgba(35,29,17,.12);border-radius:12px;padding:11px 14px}
   input.notes::placeholder{color:#A39A85}input.notes:focus,select.sel:focus{outline:none;border-color:var(--leaf-soft)}
+  select.sel{margin-top:12px}
+  .iconbtn{flex:none;width:46px;border-radius:12px;border:none;cursor:pointer;font-size:17px;display:grid;place-items:center;transition:transform .12s,filter .12s}
+  .iconbtn:active{transform:scale(.95)}
+  .addbtn{background:var(--leaf);color:#fff;font-weight:700}
+  .mic{background:#EBDFC9;color:var(--tamarind)}
+  .mic.rec{animation:pulse 1s infinite;background:var(--tamarind);color:#fff}@keyframes pulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.35)}}
   .legend{font-size:12px;color:var(--ink-soft);margin-top:9px}.legend b{color:var(--tamarind)}
   .go{margin-top:28px;width:100%;font-family:var(--sans);font-weight:700;font-size:17px;color:#3a2a05;background:linear-gradient(180deg,#F2B23A,var(--turmeric));border:none;border-radius:16px;padding:16px;cursor:pointer;box-shadow:0 12px 24px -12px rgba(230,161,28,.8);transition:transform .12s,filter .12s;display:flex;align-items:center;justify-content:center;gap:9px}
   .go:hover{filter:brightness(1.03)}.go:active{transform:scale(.985)}
@@ -77,30 +90,24 @@
   .item .name{font-size:16.5px;font-weight:700;margin-top:3px}
   .item .name .flag{font-size:11.5px;font-weight:700;color:var(--tamarind);background:#FBEAE3;border-radius:20px;padding:2px 8px;margin-left:6px;vertical-align:middle}
   .item .how{font-size:13.5px;color:var(--ink-soft);margin-top:3px}
-  .watch{display:inline-flex;align-items:center;gap:7px;margin-top:9px;font-size:12.5px;font-weight:700;color:#fff;background:#c4302b;border-radius:9px;padding:7px 11px;text-decoration:none;transition:filter .12s}
-  .watch.find{background:var(--leaf)}.watch:hover{filter:brightness(1.07)}.watch small{font-weight:500;opacity:.9}
+  .links{display:flex;flex-wrap:wrap;gap:8px;margin-top:9px}
+  .lnk{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:#fff;border-radius:9px;padding:7px 11px;text-decoration:none;transition:filter .12s}
+  .lnk:hover{filter:brightness(1.08)}.lnk small{font-weight:500;opacity:.9}
+  .lnk.yt{background:#c4302b}.lnk.find{background:var(--leaf)}.lnk.recipe{background:var(--olive)}
   .tin.dhruv .top{background:linear-gradient(135deg,#EDAE2A,#C9850F)}
   .tin.parents .top{background:linear-gradient(135deg,var(--leaf-soft),var(--leaf-deep))}
   .tin.dinner .top{background:linear-gradient(135deg,#B4502F,var(--tamarind))}
   .actions{display:flex;gap:10px;margin-top:8px;flex-wrap:wrap}
-  .actions button{flex:1;min-width:120px;font-family:var(--sans);font-weight:700;font-size:15px;border-radius:14px;padding:14px;cursor:pointer;border:none;transition:transform .12s,filter .12s;display:flex;align-items:center;justify-content:center;gap:8px}
+  .actions button{flex:1;min-width:110px;font-family:var(--sans);font-weight:700;font-size:14.5px;border-radius:14px;padding:13px;cursor:pointer;border:none;transition:transform .12s,filter .12s;display:flex;align-items:center;justify-content:center;gap:7px}
   .actions button:active{transform:scale(.98)}
-  .wa{background:#25D366;color:#06351b}.cp{background:var(--leaf);color:#fff}
+  .wa{background:#25D366;color:#06351b}.pdf{background:var(--tamarind);color:#fff}.cp{background:var(--leaf);color:#fff}
   .re{background:var(--paper-2);color:var(--leaf-deep);border:1.5px solid rgba(28,93,58,.2)!important}
-  /* shopping */
-  .addrow{display:flex;gap:8px;margin-top:12px;align-items:stretch}
-  .addrow input{flex:1;margin-top:0}
-  .iconbtn{flex:none;width:48px;border-radius:12px;border:none;cursor:pointer;font-size:18px;display:grid;place-items:center;transition:transform .12s,filter .12s}
-  .iconbtn:active{transform:scale(.95)}
-  .addbtn{background:var(--leaf);color:#fff;font-weight:700}
-  .mic{background:var(--tamarind);color:#fff}
-  .mic.rec{animation:pulse 1s infinite}@keyframes pulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.4)}}
+  .empty{text-align:center;color:var(--ink-soft);font-size:14px;padding:30px 10px}
   .shoplist{margin-top:14px;display:flex;flex-direction:column;gap:8px}
   .shoprow{display:flex;align-items:center;gap:10px;background:var(--paper-2);border:1px solid rgba(35,29,17,.10);border-radius:12px;padding:10px 12px}
   .shoprow .nm{flex:1;font-weight:600;font-size:14.5px}
-  .shoprow a{font-size:12px;font-weight:700;color:#fff;background:#FEEE00;color:#111;border-radius:8px;padding:5px 9px;text-decoration:none}
+  .shoprow a{font-size:12px;font-weight:700;background:#FEEE00;color:#111;border-radius:8px;padding:5px 9px;text-decoration:none}
   .shoprow .rm{flex:none;width:28px;height:28px;border-radius:50%;border:none;background:#eadfce;color:#7a2d18;font-weight:700;cursor:pointer}
-  .empty{text-align:center;color:var(--ink-soft);font-size:14px;padding:30px 10px}
   .shopempty{text-align:center;color:var(--ink-soft);font-size:13px;padding:14px}
   footer{text-align:center;margin-top:34px;font-size:12px;color:var(--ink-soft);line-height:1.7}footer b{color:var(--leaf-deep)}
   .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);opacity:0;background:var(--leaf-deep);color:#fff;padding:12px 20px;border-radius:30px;font-size:13.5px;font-weight:600;box-shadow:var(--shadow);transition:transform .25s,opacity .25s;z-index:9;pointer-events:none}
@@ -121,64 +128,80 @@
       </svg>
       <div><h1>Our Cook Assist</h1><div class="sub">Dhruv · Dwara · Meera</div></div>
     </div>
-    <p class="tag">Tell it what's in the kitchen and any craving, get <b>today's cooking</b> tin by tin — plus a shopping list.</p>
+    <p class="tag">Tell it what's in the kitchen and any craving — even Chinese or Italian — and get <b>today's cooking</b> tin by tin, plus a shopping list.</p>
   </header>
 
   <section class="card">
-    <div class="eyebrow">Step 1 · Plan the day</div>
-    <div class="q-title">What's in the kitchen today?</div>
-    <div class="q-note">Tap what you have, or add your own below.</div>
-    <div class="rowtop" style="margin-bottom:10px"><span style="font-size:12.5px;color:var(--ink-soft);font-weight:600">Vegetables &amp; staples</span><button class="allbtn" id="vegAll" type="button">Select all</button></div>
+    <div class="cardhead"><div><div class="eyebrow">Step 1 · Plan the day</div><div class="q-title">What's in the kitchen today?</div></div>
+      <button class="resetall" id="resetAll" type="button">↺ Reset all</button></div>
+    <div class="q-note">Tap what you have, or type / speak your own. The 🎤 works on every box.</div>
+    <div class="labrow"><span style="font-size:12.5px;color:var(--ink-soft);font-weight:600">Vegetables &amp; staples</span><button class="allbtn" id="vegAll" type="button">Select all</button></div>
     <div class="chips" id="veg"></div>
-    <input class="notes" id="vegMore" placeholder="Other items — comma separated (e.g. yam, raw mango)">
-    <div class="block"><label class="lab">Dhruv today <span>— optional craving note</span></label><input class="notes" id="kidNote" style="margin-top:0" placeholder="e.g. sandwich, noodles, mild / no spice"></div>
-    <div class="block"><label class="lab">Breakfast you feel like <span>— idli/dosa/tiffin come with a chutney</span></label><div class="seg" id="bf"></div><input class="notes" id="bfNote" placeholder="Breakfast note — e.g. bread today, fried, light, dosa"></div>
-    <div class="block"><label class="lab">Lunch style <span>— curd rice always rides along</span></label><div class="seg" id="lunch"></div>
-      <label class="lab" style="margin:16px 0 8px">Or pick a variety rice <span>— overrides the style</span></label><div class="chips" id="variety"></div>
+    <div class="microw"><input class="notes" id="vegMore" placeholder="Other items — comma separated (e.g. yam, sweet corn)"><button class="iconbtn mic" data-target="vegMore" type="button">🎤</button></div>
+
+    <div class="block"><div class="labrow"><label class="lab">Dhruv today <span>— craving note</span></label><button class="reset" data-reset="kid" type="button">↺ reset</button></div>
+      <div class="microw"><input class="notes" id="kidNote" placeholder="e.g. sandwich, noodles, mild / no spice"><button class="iconbtn mic" data-target="kidNote" type="button">🎤</button></div></div>
+
+    <div class="block"><div class="labrow"><label class="lab">Breakfast <span>— idli/dosa come with chutney</span></label><button class="reset" data-reset="bf" type="button">↺ reset</button></div>
+      <div class="seg" id="bf"></div>
+      <div class="microw"><input class="notes" id="bfNote" placeholder="e.g. bread today, fried, Chinese, light, dosa"><button class="iconbtn mic" data-target="bfNote" type="button">🎤</button></div></div>
+
+    <div class="block"><div class="labrow"><label class="lab">Lunch <span>— curd rice always rides along</span></label><button class="reset" data-reset="lunch" type="button">↺ reset</button></div>
+      <div class="seg" id="lunch"></div>
+      <label class="lab" style="margin:16px 0 8px;font-size:13px">Or pick a variety rice <span>— overrides the style</span></label><div class="chips" id="variety"></div>
       <div class="legend"><b>⏱</b> = needs something made ahead. Keep it ready the night before.</div>
-      <input class="notes" id="lunchNote" placeholder="Lunch note — e.g. roti, tamarind, gravy, light, paneer"></div>
-    <div class="block"><label class="lab">Dinner</label><div class="seg" id="dinner"></div><input class="notes" id="dinNote" placeholder="Dinner note — e.g. roti, paneer, fried, noodles, tiffin"></div>
+      <div class="microw"><input class="notes" id="lunchNote" placeholder="e.g. roti, tamarind, gravy, paneer, Chinese"><button class="iconbtn mic" data-target="lunchNote" type="button">🎤</button></div></div>
+
+    <div class="block"><div class="labrow"><label class="lab">Dinner</label><button class="reset" data-reset="dinner" type="button">↺ reset</button></div>
+      <div class="seg" id="dinner"></div>
+      <div class="microw"><input class="notes" id="dinNote" placeholder="e.g. roti, paneer, fried rice, noodles, pizza, tiffin"><button class="iconbtn mic" data-target="dinNote" type="button">🎤</button></div></div>
+
     <div class="block"><div class="toggle" id="noog"><div class="tx"><b>Cook without onion &amp; garlic</b><small>Satvik — swaps to no-onion-garlic versions</small></div><div class="switch"></div></div></div>
-    <div class="block"><label class="lab">Family note <span>— optional, shows on the plan</span></label><input class="notes" id="notes" style="margin-top:0" placeholder="e.g. guest coming, festival, keep it quick"></div>
+
+    <div class="block"><div class="labrow"><label class="lab">Family note <span>— shows on the plan</span></label><button class="reset" data-reset="fam" type="button">↺ reset</button></div>
+      <div class="microw"><input class="notes" id="notes" placeholder="e.g. guest coming, festival, keep it quick"><button class="iconbtn mic" data-target="notes" type="button">🎤</button></div></div>
+
     <button class="go" id="goBtn">🍲 Make today's plan</button>
   </section>
 
   <section id="out"><div class="empty">Your plan for the three tins will appear here.</div></section>
 
   <section class="card">
-    <div class="eyebrow">Step 2 · Shopping</div>
-    <div class="q-title">Missing ingredients &amp; shopping list</div>
-    <div class="q-note">Tap from a category, type, or use the mic. Then send it to Noon Minutes to add &amp; pay there.</div>
+    <div class="cardhead"><div><div class="eyebrow">Step 2 · Shopping</div><div class="q-title">Missing ingredients &amp; shopping</div></div>
+      <button class="resetall" id="shopClear" type="button">↺ Clear all</button></div>
+    <div class="q-note">Tap a category, type, or speak. Then open Noon to add &amp; pay there.</div>
     <div class="seg" id="shopCats"></div>
     <div class="chips" id="shopChips" style="margin-top:12px"></div>
-    <div class="addrow">
-      <input class="notes" id="shopInput" placeholder="Type an item and tap +">
-      <button class="iconbtn addbtn" id="shopAdd" type="button" title="Add">＋</button>
-      <button class="iconbtn mic" id="shopMic" type="button" title="Speak">🎤</button>
-    </div>
+    <div class="microw"><input class="notes" id="shopInput" placeholder="Type an item and tap +"><button class="iconbtn addbtn" id="shopAdd" type="button">＋</button><button class="iconbtn mic" id="shopMic" type="button">🎤</button></div>
     <select class="sel" id="noonRegion"><option value="uae-en">Noon region: UAE</option><option value="saudi-en">Noon region: Saudi Arabia</option><option value="egypt-en">Noon region: Egypt</option></select>
     <div class="shoplist" id="shopList"></div>
     <div class="actions">
-      <button class="wa" id="noonBtn" style="background:#FEEE00;color:#111">Open Noon Minutes</button>
+      <button class="cp" id="noonBtn" style="background:#FEEE00;color:#111">Open Noon Minutes</button>
       <button class="cp" id="shopCopy">Copy list</button>
       <button class="re" id="shopWa">WhatsApp</button>
     </div>
-    <div class="legend" style="margin-top:12px">Each item has a yellow <b style="color:#111">noon</b> link that opens it in Noon's search — add to cart &amp; pay inside Noon. (A web page can't fill your Noon cart or pay for you automatically.)</div>
+    <div class="legend" style="margin-top:12px">Each item's yellow <b style="color:#111">noon</b> link opens it in Noon's search — add to cart &amp; pay inside Noon. (A web page can't fill your Noon cart or pay automatically.)</div>
   </section>
 
-  <footer><b>Keep this handy:</b> open your link in Safari/Chrome → Share/menu → <b>Add to Home Screen</b>.<br>Same link works on iPhone and Android.</footer>
+  <footer><b>Keep it handy:</b> open your link in Safari/Chrome → Share/menu → <b>Add to Home Screen</b>. Same link works on iPhone &amp; Android.</footer>
 </div>
 <div class="toast" id="toast"></div>
 
 <script>
 const VB="Venkatesh Bhat",YS="Yogambal Sundar",HK="Hebbars Kitchen",YFL="Your Food Lab";
-const SOUTH_CH=[VB,HK,YS], NORTH_CH=[YFL,VB];
+const SOUTH_CH=[VB,HK,YS],NORTH_CH=[YFL,VB],WORLD_CH=[YFL,HK];
 const vid=(id,ch)=>({id,ch});
 const srch=(q,c)=>({q,c});
 const E=(label,how,link,extra={})=>Object.assign({label,how,link,tags:[],chutney:false},extra);
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const chFor=c=>c==="north"?pick(NORTH_CH):c==="south"?pick(SOUTH_CH):c==="world"?pick(WORLD_CH):null;
+function rlink(l){if(!l||l.id)return l;if(l.c){const ch=chFor(l.c);return{q:l.q+" "+ch,_ch:ch};}return l;}
+function rentry(e){return e?Object.assign({},e,{link:rlink(e.link)}):e;}
+const linkURL=l=>l.id?"https://www.youtube.com/watch?v="+l.id:"https://www.youtube.com/results?search_query="+encodeURIComponent(l.q);
+const linkLabel=l=>l.id?l.ch:(l._ch||"Search YouTube");
+function recipeURL(name){let q=name.replace(/\(.*?\)/g,"").replace(/\s*\+\s*/g," ").trim();return "https://www.padhuskitchen.com/search?q="+encodeURIComponent(q);}
 
-const VEG=["Onion","Beans","Carrot","Beetroot","Potato","Cabbage","Cauliflower","Okra (bhindi)","Brinjal",
-  "Chow chow","Snake gourd","Raw banana","Drumstick","Peas","Capsicum","Spinach (keerai)","Tomato","Cucumber","Paneer"];
+const VEG=["Onion","Beans","Carrot","Beetroot","Potato","Cabbage","Cauliflower","Okra (bhindi)","Brinjal","Chow chow","Snake gourd","Raw banana","Drumstick","Peas","Capsicum","Spinach (keerai)","Tomato","Cucumber","Paneer"];
 const SIDE={
   "Beans":["Beans poriyal","Steam beans; temper mustard, urad dal, curry leaf; finish with coconut.",srch("beans poriyal recipe","south")],
   "Carrot":["Carrot poriyal","Sauté grated carrot with a mustard-dal tempering and coconut.",srch("carrot poriyal recipe","south")],
@@ -186,7 +209,7 @@ const SIDE={
   "Potato":["Potato roast","Boil, cube and pan-roast with turmeric, chilli, curry leaf till crisp.",srch("potato roast curry recipe","south")],
   "Cabbage":["Cabbage poriyal","Stir-fry shredded cabbage with tempering, chilli and coconut.",srch("cabbage poriyal recipe","south")],
   "Cauliflower":["Gobi fry","Sauté florets with turmeric and chilli till edges brown.",srch("cauliflower fry recipe","south")],
-  "Okra (bhindi)":["Vendakkai poriyal","Crisp-fry sliced okra dry with a light tempering.",srch("vendakkai poriyal okra recipe","south")],
+  "Okra (bhindi)":["Vendakkai poriyal","Crisp-fry sliced okra dry with a light tempering.",srch("vendakkai poriyal recipe","south")],
   "Brinjal":["Kathirikai curry","Cook cubed brinjal soft with a quick masala.",srch("kathirikai curry recipe","south")],
   "Chow chow":["Chow chow kootu","Simmer with moong dal and a coconut-cumin paste.",srch("chow chow kootu recipe","south")],
   "Snake gourd":["Pudalangai kootu","Cook with moong dal; finish with coconut-cumin paste.",srch("pudalangai kootu recipe","south")],
@@ -210,25 +233,25 @@ const BREAKFAST=[
   E("Adai","Thick protein-rich lentil-rice dosa; great with avial.",srch("adai recipe","south"),{tags:["dosa","south","light"],chutney:true}),
   E("Pesarattu","Green-gram dosa with ginger chutney.",srch("pesarattu recipe","south"),{tags:["dosa","south","light"],chutney:true}),
   E("Uthappam","Thick dosa topped with onion, tomato and chilli.",srch("uthappam recipe","south"),{tags:["dosa","south"],chutney:true}),
-  E("Kuzhi paniyaram","Batter cooked into soft-crisp balls in a paniyaram pan.",srch("kuzhi paniyaram recipe","south"),{tags:["south"],chutney:true}),
+  E("Kuzhi paniyaram","Batter cooked into soft-crisp balls in a pan.",srch("kuzhi paniyaram recipe","south"),{tags:["south"],chutney:true}),
   E("Ven pongal","Rice + moong dal cooked soft; temper pepper, cumin, cashew in ghee.",vid("WR5JJP5MyN4",VB),{tags:["pongal","south","rice"],chutney:true}),
-  E("Rava idli","Roasted rava, curd and veg; steam — no fermenting.",vid("DneHAcV-PAo",VB),{tags:["rava","quick","light"],chutney:true}),
+  E("Rava idli","Roasted rava, curd and veg; steam.",vid("DneHAcV-PAo",VB),{tags:["rava","quick","light"],chutney:true}),
   E("Idiyappam + stew","Steamed string hoppers with coconut veg stew.",srch("idiyappam stew recipe","south"),{tags:["south","light"]}),
   E("Appam + stew","Soft lacy appam with coconut veg stew.",srch("appam stew recipe","south"),{tags:["south","light"]}),
-  E("Poha","Soften rinsed poha; temper mustard, peanuts, turmeric; finish with lemon.",vid("stbHx_RCVu4",YS),{tags:["light","quick"]}),
-  E("Rava upma","Roast rava; temper veg and dal; add hot water and steam soft.",srch("rava upma recipe","south"),{tags:["rava","quick"]}),
+  E("Poha","Soften poha; temper mustard, peanuts, turmeric; finish with lemon.",vid("stbHx_RCVu4",YS),{tags:["light","quick"]}),
+  E("Rava upma","Roast rava; temper veg and dal; steam soft.",srch("rava upma recipe","south"),{tags:["rava","quick"]}),
   E("Semiya upma","Roast vermicelli; cook with measured water and veg.",srch("semiya upma recipe","south"),{tags:["quick","light"]}),
-  E("Veg sandwich","Grill bread with a spiced veg or paneer filling.",srch("veg sandwich recipe"),{tags:["bread","quick","modern","paneer"]}),
-  E("Bread toast","Dip bread in besan batter and toast crisp.",srch("bread toast recipe"),{tags:["bread","fried","quick","modern"]}),
-  E("Veg roll","Wrap a veg or paneer filling in a paratha or roti.",srch("veg frankie roll recipe"),{tags:["roll","bread","modern","paneer"]}),
+  E("Veg sandwich","Grill bread with a spiced veg or paneer filling.",srch("veg sandwich recipe","world"),{tags:["bread","quick","modern","paneer"]}),
+  E("Bread toast","Dip bread in besan batter and toast crisp.",srch("bread toast recipe","world"),{tags:["bread","fried","quick","modern"]}),
+  E("Veg roll","Wrap a veg or paneer filling in a paratha or roti.",srch("veg frankie roll recipe","world"),{tags:["roll","bread","modern","paneer"]}),
   E("Paratha","Stuff dough with spiced potato or paneer; roast with ghee.",srch("aloo paneer paratha recipe","north"),{tags:["roti","paneer","north","fried"]}),
-  E("Veg cutlet","Shallow-fry spiced veg patties; serve with bread.",srch("veg cutlet recipe"),{tags:["fried","bread","modern"]}),
-  E("Veg pasta","White- or red-sauce pasta with vegetables.",srch("veg pasta recipe"),{tags:["noodles","modern"]}),
-  E("Veg noodles","Quick hakka-style veg noodles.",srch("veg hakka noodles recipe"),{tags:["noodles","quick","modern"]}),
-  E("Oats + fruit","Oats with milk or curd and fruit — no cooking fuss.",srch("oats breakfast recipe"),{tags:["light","quick"]}),
+  E("Veg cutlet","Shallow-fry spiced veg patties; serve with bread.",srch("veg cutlet recipe","world"),{tags:["fried","bread","modern"]}),
+  E("Veg pasta","White- or red-sauce pasta with vegetables.",srch("veg pasta recipe","world"),{tags:["italian","noodles","modern"]}),
+  E("Veg noodles","Quick hakka-style veg noodles.",srch("veg hakka noodles recipe","world"),{tags:["chinese","noodles","quick","modern"]}),
+  E("Oats + fruit","Oats with milk or curd and fruit — no cooking fuss.",srch("oats breakfast recipe","world"),{tags:["light","quick"]}),
   E("Besan chilla","Savoury gram-flour pancake with veggies.",srch("besan chilla recipe","north"),{tags:["light","north"]})
 ];
-const BF_BUTTONS=["Idli","Dosa","Masala dosa","Adai","Ven pongal","Poha","Veg sandwich","Veg roll","Veg pasta","Surprise me"];
+const BF_BUTTONS=["Idli","Dosa","Masala dosa","Adai","Ven pongal","Poha","Veg sandwich","Veg pasta","Surprise me"];
 
 const KID=[
   E("Idli","Steam idlis; serve with podi + ghee and a little chutney.",vid("Ctnes8jT2eM",VB),{tags:["idli","south","light"]}),
@@ -239,18 +262,19 @@ const KID=[
   E("Lemon rice","Tangy tempered lemon rice.",srch("lemon rice recipe","south"),{tags:["rice","lemon"]}),
   E("Curd rice","Soft curd rice with a mild tempering.",vid("9umLppS-k9M",VB),{tags:["rice","curd","light"]}),
   E("Tomato rice","Rice in a mild tomato masala.",vid("sMVUvwcONy0",VB),{tags:["rice","tomato"]}),
-  E("Veg sandwich","Grilled veg/cheese sandwich, cut into fingers.",srch("veg sandwich recipe"),{tags:["bread","quick","modern"]}),
-  E("Veg roll","Soft paratha roll with a mild filling.",srch("veg roll recipe"),{tags:["roll","bread","modern"]}),
-  E("Veg pasta","Mild white-sauce pasta.",srch("kids veg pasta recipe"),{tags:["noodles","modern"]}),
-  E("Veg noodles","Mild veg noodles.",srch("veg noodles recipe"),{tags:["noodles","quick","modern"]}),
-  E("Jam/honey chapathi roll","Soft chapathi rolled with jam or honey.",srch("chapati jam roll recipe"),{tags:["roti","bread","sweet"]})
+  E("Veg sandwich","Grilled veg/cheese sandwich, cut into fingers.",srch("veg sandwich recipe","world"),{tags:["bread","quick","modern"]}),
+  E("Veg roll","Soft paratha roll with a mild filling.",srch("veg roll recipe","world"),{tags:["roll","bread","modern"]}),
+  E("Veg pasta","Mild white-sauce pasta.",srch("kids veg pasta recipe","world"),{tags:["italian","noodles","modern"]}),
+  E("Veg noodles","Mild veg noodles.",srch("veg noodles recipe","world"),{tags:["chinese","noodles","quick","modern"]}),
+  E("Veg fried rice","Mild veg fried rice.",srch("veg fried rice recipe","world"),{tags:["chinese","rice","modern"]}),
+  E("Jam/honey chapathi roll","Soft chapathi rolled with jam or honey.",srch("chapati jam roll recipe","world"),{tags:["roti","bread","sweet"]})
 ];
 
 const LUNCH=[
   E("Sambar rice","Cook dal + veg + tamarind + sambar powder; mix with rice.",vid("02mEoTcRpts",VB),{tags:["sambar","rice","south"]}),
   E("Rasam rice","Simmer tamarind, tomato, rasam powder and dal water; mix with rice.",vid("wJSlx-SIUIA",YS),{tags:["rasam","rice","light","south"]}),
   E("Lemon rice","Temper mustard, dal, peanuts; fold into rice with turmeric + lemon.",srch("lemon rice recipe","south"),{tags:["rice","lemon","variety"]}),
-  E("Tamarind rice (puliyodharai)","Fold pre-made pulikachal paste into cooled rice.",vid("xoh22akg1-Y",VB),{tags:["rice","tamarind","variety"],prep:true,prepNote:"keep pulikachal paste + cooled rice ready"}),
+  E("Tamarind rice (puliyodharai)","Fold pulikachal paste into cooled rice.",vid("xoh22akg1-Y",VB),{tags:["rice","tamarind","variety"],prep:true,prepNote:"keep pulikachal paste + cooled rice ready"}),
   E("Coconut rice","Temper coconut, dal, cashew; fold into warm rice.",vid("LdpmszojtFU",VB),{tags:["rice","coconut","variety"]}),
   E("Tomato rice","Cook a tomato masala, then mix through rice.",vid("sMVUvwcONy0",VB),{tags:["rice","tomato","variety"],prep:true,prepNote:"make the tomato masala first"}),
   E("Coriander / mint rice","Toss rice in a fresh coriander-mint chutney with whole spices.",srch("coriander mint rice recipe","south"),{tags:["rice","variety"],prep:true,prepNote:"grind the chutney first"}),
@@ -262,9 +286,7 @@ const LUNCH=[
   E("Paneer butter masala + roti","Creamy paneer gravy with soft rotis.",srch("paneer butter masala recipe","north"),{tags:["roti","paneer","north","gravy"]})
 ];
 const LUNCH_BUTTONS=["Sambar day","Rasam day","Variety rice","Gravy + roti","Surprise me"];
-const VARIETY=[{key:"lemon",label:"Lemon rice"},{key:"tamarind",label:"Tamarind rice (puliyodharai)",prep:true},
-  {key:"coconut",label:"Coconut rice"},{key:"tomato",label:"Tomato rice",prep:true},
-  {key:"coriander",label:"Coriander / mint rice",prep:true},{key:"bisibele",label:"Bisibelebath",prep:true},{key:"pulao",label:"Vegetable pulao"}];
+const VARIETY=[{key:"lemon",label:"Lemon rice"},{key:"tamarind",label:"Tamarind rice (puliyodharai)",prep:true},{key:"coconut",label:"Coconut rice"},{key:"tomato",label:"Tomato rice",prep:true},{key:"coriander",label:"Coriander / mint rice",prep:true},{key:"bisibele",label:"Bisibelebath",prep:true},{key:"pulao",label:"Vegetable pulao"}];
 
 const DINNER=[
   E("Paneer mutter + chapathi","Creamy peas-paneer gravy with soft chapathis.",srch("paneer mutter masala recipe","north"),{tags:["roti","paneer","north","gravy"]}),
@@ -281,80 +303,111 @@ const DINNER=[
   E("Semiya pulao","Roast vermicelli, add veg, cook with measured water.",vid("5PLNz7esDdE",VB),{tags:["rice","quick","light"]}),
   E("Chutney pulav","Coriander-mint chutney tossed through rice with veg.",vid("RYG0RgfzhY4",VB),{tags:["rice","quick"]}),
   E("Ven pongal + gotsu","Comforting pongal with a brinjal gotsu.",vid("WR5JJP5MyN4",VB),{tags:["rice","light","south"]}),
-  E("Veg fried rice","Stir-fry cooked rice with veg, soy and pepper.",srch("veg fried rice recipe"),{tags:["rice","noodles","modern","fried"]}),
-  E("Veg noodles","Quick hakka-style veg noodles.",srch("veg hakka noodles recipe"),{tags:["noodles","modern","quick"]}),
+  E("Veg fried rice","Stir-fry cooked rice with veg, soy and pepper.",srch("veg fried rice recipe","world"),{tags:["chinese","rice","modern","fried"]}),
+  E("Veg hakka noodles","Tossed noodles with crunchy veg and sauces.",srch("veg hakka noodles recipe","world"),{tags:["chinese","noodles","modern","quick"]}),
+  E("Gobi manchurian + fried rice","Crispy cauliflower in a tangy Indo-Chinese sauce.",srch("gobi manchurian recipe","world"),{tags:["chinese","modern"]}),
+  E("Chilli paneer + noodles","Paneer tossed in a spicy Indo-Chinese sauce.",srch("chilli paneer recipe","world"),{tags:["chinese","paneer","modern"]}),
+  E("Schezwan fried rice","Spicy schezwan-style veg fried rice.",srch("schezwan fried rice recipe","world"),{tags:["chinese","rice","modern","fried"]}),
+  E("White sauce pasta","Creamy veg pasta.",srch("white sauce pasta recipe","world"),{tags:["italian","noodles","modern"]}),
+  E("Veg pizza","Homemade veg pizza on a tawa or oven.",srch("veg pizza recipe","world"),{tags:["italian","bread","modern"]}),
   E("Pav bhaji","Mashed veg bhaji with buttered pav.",srch("pav bhaji recipe","north"),{tags:["bread","north","modern"]}),
-  E("Veg sandwich + soup","Grilled sandwiches with a light soup.",srch("veg sandwich soup recipe"),{tags:["bread","light","modern"]}),
+  E("Veg sandwich + soup","Grilled sandwiches with a light soup.",srch("veg sandwich soup recipe","world"),{tags:["bread","light","modern"]}),
   E("Dosa + chutney","Crisp dosas with a fresh chutney.",CHUTNEY,{tags:["dosa","south","tiffin"]}),
   E("Adai + avial","Protein-rich lentil dosa with avial or chutney.",srch("adai avial recipe","south"),{tags:["dosa","south","tiffin"],chutney:true}),
   E("Neer dosa","Soft lacy rice-coconut dosa with chutney.",srch("neer dosa recipe","south"),{tags:["dosa","south","tiffin","light"],chutney:true}),
   E("Rava dosa","Crisp instant semolina dosa.",srch("rava dosa recipe","south"),{tags:["dosa","rava","south","tiffin","quick"],chutney:true}),
   E("Masala dosa","Crisp dosa with potato masala filling.",srch("masala dosa recipe","south"),{tags:["dosa","south","tiffin"],chutney:true}),
-  E("Kuzhi paniyaram","Soft-crisp batter balls from a paniyaram pan.",srch("kuzhi paniyaram recipe","south"),{tags:["south","tiffin"],chutney:true})
+  E("Kuzhi paniyaram","Soft-crisp batter balls from a pan.",srch("kuzhi paniyaram recipe","south"),{tags:["south","tiffin"],chutney:true})
 ];
-const DIN_BUTTONS=["Roti + sabji","Poori + aloo bhaji","Vegetable pulao + raita","Tiffin / dosa","Veg fried rice","Pav bhaji","Surprise me"];
+const DIN_BUTTONS=["Roti + sabji","Poori + aloo bhaji","Vegetable pulao + raita","Tiffin / dosa","Chinese","Pav bhaji","Surprise me"];
 
 const KW={bread:"bread",sandwich:"bread",toast:"bread",bun:"bread",pav:"bread",roll:"roll",frankie:"roll",wrap:"roll",kathi:"roll",
   fried:"fried",fry:"fried",crispy:"fried",light:"light",healthy:"light",diet:"light",simple:"light","less oil":"light",sweet:"sweet",
-  paneer:"paneer",noodle:"noodles",maggi:"noodles",pasta:"noodles",hakka:"noodles",oats:"light",millet:"light",rice:"rice",
-  roti:"roti",chapathi:"roti",chapati:"roti",phulka:"roti",paratha:"roti",north:"north",south:"south",quick:"quick",fast:"quick",
-  instant:"quick","no time":"quick",rava:"rava",semiya:"quick",dosa:"dosa",tiffin:"tiffin",adai:"tiffin",paniyaram:"tiffin",
-  idli:"idli",pongal:"pongal",tamarind:"tamarind",lemon:"lemon",coconut:"coconut",tomato:"tomato",curd:"curd",
-  pulao:"pulao",biryani:"pulao",sambar:"sambar",rasam:"rasam",gravy:"gravy",kuzhambu:"gravy"};
+  paneer:"paneer",noodle:"noodles",maggi:"noodles",hakka:"chinese",rice:"rice",roti:"roti",chapathi:"roti",chapati:"roti",phulka:"roti",paratha:"roti",
+  north:"north",south:"south",quick:"quick",fast:"quick",instant:"quick","no time":"quick",rava:"rava",semiya:"quick",dosa:"dosa",tiffin:"tiffin",
+  adai:"tiffin",paniyaram:"tiffin",idli:"idli",pongal:"pongal",tamarind:"tamarind",lemon:"lemon",coconut:"coconut",tomato:"tomato",curd:"curd",
+  pulao:"pulao",biryani:"pulao",sambar:"sambar",rasam:"rasam",gravy:"gravy",kuzhambu:"gravy",
+  chinese:"chinese",manchurian:"chinese",schezwan:"chinese","fried rice":"chinese","chilli":"chinese","spring roll":"chinese","indo chinese":"chinese",
+  italian:"italian",pizza:"italian",pasta:"italian",continental:"world",mexican:"world",thai:"world"};
 function noteTags(note){const n=(note||"").toLowerCase();const t=new Set();for(const k in KW){if(n.includes(k))t.add(KW[k]);}return t;}
 function matchPool(pool,note){if(!note||!note.trim())return null;const tags=noteTags(note),n=note.toLowerCase();
   const hits=pool.filter(d=>{if(d.tags&&d.tags.some(t=>tags.has(t)))return true;return d.label.toLowerCase().split(/[^a-z]+/).some(w=>w.length>3&&n.includes(w));});
   return hits.length?hits:null;}
+const FILLER=/\b(i|we|am|are|is|feel|like|want|wanted|craving|for|some|something|today|please|make|cook|a|an|the|to|have|having|of|cuisine|dish|food|in|my|kid|dhruv|eat|eating)\b/gi;
+function cleanNote(n){let s=(n||"").replace(FILLER,"").replace(/[^a-zA-Z ]/g," ").replace(/\s+/g," ").trim();
+  return s.split(" ").filter(Boolean).slice(0,5).map(w=>w[0].toUpperCase()+w.slice(1)).join(" ");}
+function guessCuisine(note){const t=noteTags(note);if(t.has("north"))return "north";if(t.has("south"))return "south";return "world";}
+function customEntry(note){const lbl=cleanNote(note)||"Your choice";return E(lbl,"Your craving — pick a video or recipe below.",srch(note+" veg recipe",guessCuisine(note)),{custom:true});}
 
 const state={veg:new Set(),bf:"Surprise me",lunch:"Surprise me",variety:null,dinner:"Surprise me",noog:false};
-const pick=a=>a[Math.floor(Math.random()*a.length)];
 const $=s=>document.querySelector(s);
 const find=(pool,label)=>pool.find(d=>d.label===label);
-const chFor=c=>c==="north"?pick(NORTH_CH):c==="south"?pick(SOUTH_CH):null;
-function rlink(l){if(!l||l.id)return l;if(l.c){const ch=chFor(l.c);return{q:l.q+" "+ch,_ch:ch};}return l;}
-function rentry(e){return e?Object.assign({},e,{link:rlink(e.link)}):e;}
-const linkURL=l=>l.id?"https://www.youtube.com/watch?v="+l.id:"https://www.youtube.com/results?search_query="+encodeURIComponent(l.q);
-const linkLabel=l=>l.id?l.ch:(l._ch||"Search YouTube");
 
 function segRow(host,items,key){host.innerHTML="";items.forEach(it=>{const b=document.createElement("button");b.type="button";b.textContent=it;
   if(state[key]===it)b.classList.add("on");b.onclick=()=>{state[key]=it;[...host.children].forEach(c=>c.classList.remove("on"));b.classList.add("on");};host.appendChild(b);});}
-
 const vegHost=$("#veg");
 VEG.forEach(it=>{const b=document.createElement("button");b.className="chip";b.type="button";b.textContent=it;
   b.onclick=()=>{b.classList.toggle("on");state.veg.has(it)?state.veg.delete(it):state.veg.add(it);syncAll();};vegHost.appendChild(b);});
 function syncAll(){$("#vegAll").textContent=state.veg.size===VEG.length?"Clear all":"Select all";}
 $("#vegAll").onclick=()=>{const all=state.veg.size===VEG.length;[...vegHost.children].forEach((c,i)=>{if(all){c.classList.remove("on");state.veg.delete(VEG[i]);}else{c.classList.add("on");state.veg.add(VEG[i]);}});syncAll();};
-segRow($("#bf"),BF_BUTTONS,"bf");segRow($("#lunch"),LUNCH_BUTTONS,"lunch");segRow($("#dinner"),DIN_BUTTONS,"dinner");
-(function(){const host=$("#variety");VARIETY.forEach(v=>{const b=document.createElement("button");b.className="chip";b.type="button";
+function buildVariety(){const host=$("#variety");host.innerHTML="";VARIETY.forEach(v=>{const b=document.createElement("button");b.className="chip"+(state.variety===v.key?" on":"");b.type="button";
   b.innerHTML=v.label.replace(" (puliyodharai)","")+(v.prep?' <span class="pp">⏱</span>':'');
-  b.onclick=()=>{const on=state.variety===v.key;state.variety=on?null:v.key;[...host.children].forEach(c=>c.classList.remove("on"));if(!on)b.classList.add("on");};host.appendChild(b);});})();
+  b.onclick=()=>{const on=state.variety===v.key;state.variety=on?null:v.key;[...host.children].forEach(c=>c.classList.remove("on"));if(!on)b.classList.add("on");};host.appendChild(b);});}
+segRow($("#bf"),BF_BUTTONS,"bf");segRow($("#lunch"),LUNCH_BUTTONS,"lunch");segRow($("#dinner"),DIN_BUTTONS,"dinner");buildVariety();
 $("#noog").onclick=function(){state.noog=!state.noog;this.classList.toggle("on",state.noog);};
 
+/* resets */
+function doReset(which){
+  if(which==="kid")$("#kidNote").value="";
+  if(which==="bf"){state.bf="Surprise me";segRow($("#bf"),BF_BUTTONS,"bf");$("#bfNote").value="";}
+  if(which==="lunch"){state.lunch="Surprise me";state.variety=null;segRow($("#lunch"),LUNCH_BUTTONS,"lunch");buildVariety();$("#lunchNote").value="";}
+  if(which==="dinner"){state.dinner="Surprise me";segRow($("#dinner"),DIN_BUTTONS,"dinner");$("#dinNote").value="";}
+  if(which==="fam")$("#notes").value="";
+  toast("Reset");
+}
+document.querySelectorAll(".reset[data-reset]").forEach(b=>b.onclick=()=>doReset(b.dataset.reset));
+$("#resetAll").onclick=()=>{state.veg.clear();[...vegHost.children].forEach(c=>c.classList.remove("on"));syncAll();$("#vegMore").value="";
+  ["kid","bf","lunch","dinner","fam"].forEach(doReset);state.noog=false;$("#noog").classList.remove("on");toast("All reset");};
+
+/* voice on every box */
+function dictateTo(input,btn){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){toast("Voice isn't supported on this browser — please type.");return;}
+  const rec=new SR();rec.lang="en-IN";rec.interimResults=false;rec.maxAlternatives=1;
+  btn.classList.add("rec");toast("Listening…");
+  rec.onresult=e=>{const txt=e.results[0][0].transcript;input.value=(input.value&&input.value.trim()?input.value.trim()+", ":"")+txt;};
+  rec.onerror=()=>toast("Didn't catch that");rec.onend=()=>btn.classList.remove("rec");
+  try{rec.start();}catch(e){btn.classList.remove("rec");}}
+document.querySelectorAll(".mic[data-target]").forEach(b=>b.onclick=()=>dictateTo(document.getElementById(b.dataset.target),b));
+
+/* generate */
 let current=null;
-function pickFrom(pool,explicit,note){if(explicit&&explicit!=="Surprise me"){const e=find(pool,explicit);if(e)return e;}const m=matchPool(pool,note);if(m)return pick(m);return null;}
+function pickFor(pool,explicit,note){if(explicit&&explicit!=="Surprise me"){const e=find(pool,explicit);if(e)return e;}
+  const m=matchPool(pool,note);if(m)return pick(m);if(note&&note.trim())return customEntry(note);return null;}
 function pickDinner(){const note=$("#dinNote").value;
   if(state.dinner==="Roti + sabji")return pick(DINNER.filter(d=>d.tags.includes("roti")));
   if(state.dinner==="Tiffin / dosa")return pick(DINNER.filter(d=>d.tags.includes("tiffin")));
-  return pickFrom(DINNER,state.dinner,note)||pick(DINNER);}
+  if(state.dinner==="Chinese")return pick(DINNER.filter(d=>d.tags.includes("chinese")));
+  return pickFor(DINNER,state.dinner,note)||pick(DINNER);}
 function generate(){
   const noog=state.noog;
   const typed=($("#vegMore").value||"").split(",").map(s=>s.trim()).filter(Boolean);
   const selVeg=[...state.veg];const customVeg=[];
   typed.forEach(t=>{const known=VEG.find(v=>v.toLowerCase().includes(t.toLowerCase())||t.toLowerCase().includes(v.split(" ")[0].toLowerCase()));
     if(known){if(!selVeg.includes(known))selVeg.push(known);}else customVeg.push(t);});
-  const bf=rentry(pickFrom(BREAKFAST,state.bf,$("#bfNote").value)||pick(BREAKFAST));
+  const bf=rentry(pickFor(BREAKFAST,state.bf,$("#bfNote").value)||pick(BREAKFAST));
   const kidNote=$("#kidNote").value;
-  let kidBase=matchPool(KID,kidNote)?pick(matchPool(KID,kidNote)):null;
+  let kidBase=pickFor(KID,null,kidNote);
   if(!kidBase){if(bf.label==="Idli")kidBase=find(KID,"Idli");else if(bf.label==="Dosa")kidBase=find(KID,"Ghee dosa");
     else if(selVeg.includes("Potato"))kidBase=find(KID,"Potato rice");else if(selVeg.includes("Okra (bhindi)"))kidBase=find(KID,"Bhindi rice");
     else if(selVeg.includes("Tomato"))kidBase=find(KID,"Tomato rice");else kidBase=pick([find(KID,"Idli"),find(KID,"Lemon rice"),find(KID,"Curd rice"),find(KID,"Mini idli")]);}
   const kid=rentry(kidBase);
   const snack=selVeg.includes("Cucumber")?["Cucumber sticks + apple + 2 biscuits","Crunchy, no cooking — pack and go."]
     :pick([["Fruit salad + wafer","Apple, banana, pomegranate; a wafer on the side."],["Carrot & cucumber sticks + grapes + Marie biscuit","Cut the night before to save time."],["Roasted sundal + a fruit","A spoon of tempered chana with a banana."]]);
-  let lunch,prep=null;
+  let lunch,prep=null;const lunchNote=$("#lunchNote").value;
   if(state.variety){lunch=find(LUNCH,VARIETY.find(v=>v.key===state.variety).label);}
-  else{const m=matchPool(LUNCH,$("#lunchNote").value);
+  else{const m=matchPool(LUNCH,lunchNote);
     if(m)lunch=pick(m);
+    else if(lunchNote&&lunchNote.trim())lunch=customEntry(lunchNote);
     else{const style=state.lunch==="Surprise me"?pick(["Sambar day","Rasam day","Variety rice","Gravy + roti"]):state.lunch;
       if(style==="Sambar day")lunch=find(LUNCH,"Sambar rice");else if(style==="Rasam day")lunch=find(LUNCH,"Rasam rice");
       else if(style==="Variety rice")lunch=pick(LUNCH.filter(d=>d.tags.includes("variety")));
@@ -370,37 +423,61 @@ function generate(){
   current={bf,kid,snack,lunch,side,dinner,noog,prep,notes:$("#notes").value.trim(),chutney:bf.chutney,chutLabel:noog?"Coconut chutney":"Coconut & onion chutney"};
   render(current);
 }
-
-function videoBtn(l){if(!l)return"";const fnd=!l.id;return `<a class="watch ${fnd?'find':''}" target="_blank" rel="noopener" href="${linkURL(l)}">${fnd?'🔎 Find video':'▶ Watch'} <small>· ${linkLabel(l)}</small></a>`;}
-function item(k,name,how,link,flag){return `<div class="item"><div class="k">${k}</div><div class="name">${name}${flag?'<span class="flag">⏱ prep</span>':''}</div><div class="how">${how}</div>${videoBtn(link)}</div>`;}
+function linksHtml(link,name,noRecipe){let h='<div class="links">';
+  if(link){const fnd=!link.id;h+=`<a class="lnk ${fnd?'find':'yt'}" target="_blank" rel="noopener" href="${linkURL(link)}">${fnd?'🔎 Find video':'▶ Watch'} <small>· ${linkLabel(link)}</small></a>`;}
+  if(!noRecipe)h+=`<a class="lnk recipe" target="_blank" rel="noopener" href="${recipeURL(name)}">📖 Recipe <small>· Padhu's</small></a>`;
+  return h+'</div>';}
+function item(k,name,how,link,flag,noRecipe){return `<div class="item"><div class="k">${k}</div><div class="name">${name}${flag?'<span class="flag">⏱ prep</span>':''}</div><div class="how">${how}</div>${(link||!noRecipe)?linksHtml(link,name,noRecipe):''}</div>`;}
 function render(p){
   const today=new Date().toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long'});
   let h=`<div class="plan-head"><div class="d">Today's tiffins</div><h2>${today}</h2></div>`;
   if(p.noog)h+=`<div class="note-banner">Cooking satvik today — no onion &amp; garlic 🌿</div>`;
   if(p.prep)h+=`<div class="prep-banner">⏱ ${p.prep.label}: ${p.prep.note} — best done the night before.</div>`;
   if(p.notes)h+=`<div class="note-banner">📝 ${escapeHtml(p.notes)}</div>`;
-  h+=`<div class="tin dhruv"><div class="handle"></div><div class="top"><div><div class="who">Dhruv</div><div class="role">School box · ready by 6:00</div></div><div class="badge">D</div></div><div class="body">${item("Meal",p.kid.label,p.kid.how,p.kid.link)}${item("Snack",p.snack[0],p.snack[1],null)}</div></div>`;
+  h+=`<div class="tin dhruv"><div class="handle"></div><div class="top"><div><div class="who">Dhruv</div><div class="role">School box · ready by 6:00</div></div><div class="badge">D</div></div><div class="body">${item("Meal",p.kid.label,p.kid.how,p.kid.link)}${item("Snack",p.snack[0],p.snack[1],null,false,true)}</div></div>`;
   h+=`<div class="tin parents"><div class="handle"></div><div class="top"><div><div class="who">Dwara &amp; Meera</div><div class="role">Breakfast + lunch · carry</div></div><div class="badge">D·M</div></div><div class="body">${item("Breakfast",p.bf.label,p.bf.how,p.bf.link)}${p.chutney?item("With",p.chutLabel,"A quick chutney to go with the tiffin.",CHUTNEY):""}${item("Lunch · main",p.lunch.label,p.lunch.how,p.lunch.link,!!p.prep)}${item("Lunch · always",CURDRICE.label,CURDRICE.how,CURDRICE.link)}${item("Lunch · side",p.side[0],p.side[1],p.side[2])}</div></div>`;
   const dinChut=p.dinner.chutney&&!/chutney/i.test(p.dinner.label);
   h+=`<div class="tin dinner"><div class="handle"></div><div class="top"><div><div class="who">Dinner</div><div class="role">All three · evening</div></div><div class="badge">🌙</div></div><div class="body">${item("Tonight",p.dinner.label,p.dinner.how,p.dinner.link)}${dinChut?item("With",p.chutLabel,"A coconut or tomato chutney on the side.",CHUTNEY):""}</div></div>`;
-  h+=`<div class="actions"><button class="wa" id="waBtn">Share on WhatsApp</button><button class="cp" id="cpBtn">Copy plan</button><button class="re" id="reBtn">New plan</button></div>`;
-  $("#out").innerHTML=h;$("#waBtn").onclick=shareWA;$("#cpBtn").onclick=copyPlan;$("#reBtn").onclick=generate;$("#out").scrollIntoView({behavior:'smooth',block:'start'});
+  h+=`<div class="actions"><button class="wa" id="waBtn">WhatsApp (text)</button><button class="pdf" id="pdfBtn">Share PDF</button><button class="re" id="reBtn">New plan</button></div>`;
+  $("#out").innerHTML=h;$("#waBtn").onclick=shareWA;$("#pdfBtn").onclick=sharePDF;$("#reBtn").onclick=generate;$("#out").scrollIntoView({behavior:'smooth',block:'start'});
 }
 function escapeHtml(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function planText(){const p=current;if(!p)return"";const today=new Date().toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long'});
-  const L=l=>l?"\n   "+(l.id?"▶ ":"🔎 ")+linkLabel(l)+": "+linkURL(l):"";
+  const L=(name,link)=>{let s="";if(link)s+="\n   "+(link.id?"▶ ":"🔎 ")+linkLabel(link)+": "+linkURL(link);s+="\n   📖 Recipe: "+recipeURL(name);return s;};
   let t=`🍲 OUR COOK ASSIST — ${today}\n`;if(p.noog)t+=`(no onion & garlic)\n`;if(p.prep)t+=`⏱ Prep ahead: ${p.prep.label} — ${p.prep.note}\n`;if(p.notes)t+=`Note: ${p.notes}\n`;
-  t+=`\n👦 DHRUV (ready by 6:00)\n• Meal: ${p.kid.label}${L(p.kid.link)}\n• Snack: ${p.snack[0]}\n`;
-  t+=`\n👩‍🍳 DWARA & MEERA (carry)\n• Breakfast: ${p.bf.label}${L(p.bf.link)}\n`;if(p.chutney)t+=`   + ${p.chutLabel}: ${linkURL(CHUTNEY)}\n`;
-  t+=`• Lunch: ${p.lunch.label}${L(p.lunch.link)}\n• + Curd rice${L(CURDRICE.link)}\n• Side: ${p.side[0]}${L(p.side[2])}\n`;
-  t+=`\n🌙 DINNER (all)\n• ${p.dinner.label}${L(p.dinner.link)}\n`;if(p.dinner.chutney&&!/chutney/i.test(p.dinner.label))t+=`   + ${p.chutLabel}: ${linkURL(CHUTNEY)}\n`;return t;}
+  t+=`\n👦 DHRUV (ready by 6:00)\n• Meal: ${p.kid.label}${L(p.kid.label,p.kid.link)}\n• Snack: ${p.snack[0]}\n`;
+  t+=`\n👩‍🍳 DWARA & MEERA (carry)\n• Breakfast: ${p.bf.label}${L(p.bf.label,p.bf.link)}\n`;if(p.chutney)t+=`   + ${p.chutLabel}\n`;
+  t+=`• Lunch: ${p.lunch.label}${L(p.lunch.label,p.lunch.link)}\n• + Curd rice\n• Side: ${p.side[0]}${L(p.side[0],p.side[2])}\n`;
+  t+=`\n🌙 DINNER (all)\n• ${p.dinner.label}${L(p.dinner.label,p.dinner.link)}\n`;return t;}
 function shareWA(){const t=planText();if(t)window.open("https://wa.me/?text="+encodeURIComponent(t),"_blank");}
-function copyPlan(){const t=planText();navigator.clipboard?.writeText(t).then(()=>toast("Plan copied")).catch(()=>fallbackCopy(t));}
-function fallbackCopy(t){const a=document.createElement("textarea");a.value=t;document.body.appendChild(a);a.select();try{document.execCommand("copy");toast("Plan copied");}catch(e){toast("Copy failed");}a.remove();}
+
+function sharePDF(){const p=current;if(!p){toast("Make a plan first");return;}
+  const jsPDFns=window.jspdf;if(!jsPDFns||!jsPDFns.jsPDF){toast("PDF needs internet — connect & retry");return;}
+  const doc=new jsPDFns.jsPDF({unit:"pt",format:"a4"});const M=40;let y=120;
+  doc.setFillColor(18,63,40);doc.rect(0,0,595,92,"F");
+  doc.setTextColor(255,255,255);doc.setFont("helvetica","bold");doc.setFontSize(22);doc.text("Our Cook Assist",M,46);
+  doc.setFont("helvetica","normal");doc.setFontSize(11);
+  doc.text(new Date().toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long'}),M,70);
+  function ck(){if(y>770){doc.addPage();y=56;}}
+  function banner(tx){doc.setFont("helvetica","italic");doc.setFontSize(10);doc.setTextColor(120,70,20);doc.text(tx,M,y);y+=18;}
+  function sec(t){ck();doc.setFont("helvetica","bold");doc.setFontSize(13);doc.setTextColor(28,93,58);doc.text(t,M,y);y+=18;}
+  function dish(name,link,noRecipe){ck();doc.setFont("helvetica","bold");doc.setFontSize(11.5);doc.setTextColor(35,29,17);doc.text("• "+name,M+6,y);y+=15;
+    if(link){doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(40,90,170);doc.textWithLink((link.id?"Watch video":"Find video")+" ("+linkLabel(link)+")",M+16,y,{url:linkURL(link)});y+=13;}
+    if(!noRecipe){doc.setFontSize(9.5);doc.setTextColor(150,90,20);doc.textWithLink("Recipe — Padhu's Kitchen",M+16,y,{url:recipeURL(name)});y+=13;}y+=6;doc.setTextColor(40,40,40);}
+  if(p.noog)banner("No onion & garlic");if(p.prep)banner("Prep ahead: "+p.prep.label+" — "+p.prep.note);if(p.notes)banner("Note: "+p.notes);
+  sec("DHRUV — ready by 6:00");dish(p.kid.label,p.kid.link);ck();doc.setFont("helvetica","normal");doc.setFontSize(10.5);doc.setTextColor(60,60,60);doc.text("Snack: "+p.snack[0],M+6,y);y+=20;
+  sec("DWARA & MEERA — carry");dish(p.bf.label,p.bf.link);if(p.chutney){doc.setFontSize(10);doc.setTextColor(60,60,60);doc.text("with "+p.chutLabel,M+10,y);y+=16;}
+  dish(p.lunch.label,p.lunch.link);doc.setFontSize(10.5);doc.setTextColor(60,60,60);doc.text("+ Curd rice",M+6,y);y+=18;dish(p.side[0],p.side[2]);
+  sec("DINNER — all three");dish(p.dinner.label,p.dinner.link);
+  const blob=doc.output("blob");const file=new File([blob],"cook-assist-plan.pdf",{type:"application/pdf"});
+  if(navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file],title:"Today's plan"}).catch(()=>{});}
+  else{doc.save("cook-assist-plan.pdf");toast("PDF saved — attach it in WhatsApp");}
+}
+
 let tt;function toast(m){const e=$("#toast");e.textContent=m;e.classList.add("show");clearTimeout(tt);tt=setTimeout(()=>e.classList.remove("show"),1800);}
 $("#goBtn").onclick=generate;
 
-/* ---------------- Shopping ---------------- */
+/* shopping */
 const SHOP={
  Fruits:["Apple","Banana","Orange","Pomegranate","Grapes","Mango","Watermelon","Mosambi","Guava","Papaya"],
  Vegetables:["Onion","Tomato","Potato","Beans","Carrot","Beetroot","Cabbage","Cauliflower","Okra","Brinjal","Capsicum","Drumstick","Curry leaves","Coriander","Green chilli","Ginger","Garlic","Lemon","Spinach","Peas"],
@@ -422,17 +499,15 @@ function addItemsFromText(txt){txt.split(/,| and |\n|;/).map(s=>s.trim()).filter
 $("#shopAdd").onclick=()=>{const v=$("#shopInput").value;if(v.trim()){addItemsFromText(v);$("#shopInput").value="";}};
 $("#shopInput").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();$("#shopAdd").click();}});
 $("#noonRegion").onchange=renderList;
-$("#shopMic").onclick=()=>{const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){toast("Voice isn't supported on this browser — please type.");return;}
-  const rec=new SR();rec.lang="en-IN";rec.interimResults=false;rec.maxAlternatives=1;const mic=$("#shopMic");
-  mic.classList.add("rec");toast("Listening… say items");
-  rec.onresult=e=>{addItemsFromText(e.results[0][0].transcript);toast("Added");};
-  rec.onerror=()=>toast("Didn't catch that");rec.onend=()=>mic.classList.remove("rec");
-  try{rec.start();}catch(e){mic.classList.remove("rec");}};
+$("#shopMic").onclick=function(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){toast("Voice isn't supported here — please type.");return;}const rec=new SR();rec.lang="en-IN";rec.interimResults=false;const mic=this;
+  mic.classList.add("rec");toast("Listening… say items");rec.onresult=e=>{addItemsFromText(e.results[0][0].transcript);toast("Added");};
+  rec.onerror=()=>toast("Didn't catch that");rec.onend=()=>mic.classList.remove("rec");try{rec.start();}catch(e){mic.classList.remove("rec");}};
 function shopText(){return "🛒 Shopping list:\n"+[...cart].map(i=>"• "+i).join("\n");}
 $("#noonBtn").onclick=()=>window.open("https://minutes.noon.com","_blank");
-$("#shopCopy").onclick=()=>{if(!cart.size){toast("List is empty");return;}navigator.clipboard?.writeText(shopText()).then(()=>toast("List copied")).catch(()=>fallbackCopy(shopText()));};
+$("#shopCopy").onclick=()=>{if(!cart.size){toast("List is empty");return;}navigator.clipboard?.writeText(shopText()).then(()=>toast("List copied")).catch(()=>{});};
 $("#shopWa").onclick=()=>{if(!cart.size){toast("List is empty");return;}window.open("https://wa.me/?text="+encodeURIComponent(shopText()),"_blank");};
+$("#shopClear").onclick=()=>{cart.clear();renderChips();renderList();toast("List cleared");};
 renderChips();renderList();
 </script>
 </body>
