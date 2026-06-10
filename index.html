@@ -94,6 +94,14 @@
   .lnk{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:#fff;border-radius:9px;padding:7px 11px;text-decoration:none;transition:filter .12s}
   .lnk:hover{filter:brightness(1.08)}.lnk small{font-weight:500;opacity:.9}
   .lnk.yt{background:#c4302b}.lnk.find{background:var(--leaf)}.lnk.recipe{background:var(--olive)}
+  details.rec{margin-top:9px}
+  details.rec>summary{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:#fff;background:var(--olive);border-radius:9px;padding:7px 11px;cursor:pointer;list-style:none}
+  details.rec>summary::-webkit-details-marker{display:none}
+  details.rec[open]>summary{border-radius:9px 9px 0 0}
+  .recbox{background:var(--paper-2);border:1px solid rgba(122,106,31,.3);border-radius:0 12px 12px 12px;padding:12px 14px;font-size:13px}
+  .recbox h5{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--olive);margin:9px 0 3px;font-weight:700}
+  .recbox h5:first-child{margin-top:0}
+  .recbox p{margin:0;color:var(--ink-soft);line-height:1.55}
   .tin.dhruv .top{background:linear-gradient(135deg,#EDAE2A,#C9850F)}
   .tin.parents .top{background:linear-gradient(135deg,var(--leaf-soft),var(--leaf-deep))}
   .tin.dinner .top{background:linear-gradient(135deg,#B4502F,var(--tamarind))}
@@ -199,7 +207,88 @@ function rlink(l){if(!l||l.id)return l;if(l.c){const ch=chFor(l.c);return{q:l.q+
 function rentry(e){return e?Object.assign({},e,{link:rlink(e.link)}):e;}
 const linkURL=l=>l.id?"https://www.youtube.com/watch?v="+l.id:"https://www.youtube.com/results?search_query="+encodeURIComponent(l.q);
 const linkLabel=l=>l.id?l.ch:(l._ch||"Search YouTube");
-function recipeURL(name){let q=name.replace(/\(.*?\)/g,"").replace(/\s*\+\s*/g," ").trim();return "https://www.padhuskitchen.com/search?q="+encodeURIComponent(q);}
+const RECIPES={
+"idli":["Idli rice 2 cups, urad dal 1/2 cup, fenugreek 1 tsp, salt.","Soak rice and dal (with fenugreek) separately 4-5 hrs. Grind urad dal fluffy, then rice slightly coarse; mix, salt lightly and ferment 8-10 hrs. Pour into greased moulds and steam 10-12 min till a toothpick comes out clean."],
+"dosa":["Fermented idli/dosa batter (slightly thinner), oil or ghee.","Heat a tawa, pour a ladle of batter and spread thin in a spiral. Drizzle oil around the edges, cook till golden and crisp, fold and serve with chutney."],
+"masala dosa":["Dosa batter; potato 3, onion 1, green chilli, turmeric, mustard, curry leaf.","Make potato masala: temper mustard, curry leaf, onion and chilli; add turmeric and mashed boiled potato with a splash of water. Spread a crisp dosa, place masala in the centre, fold and serve."],
+"rava dosa":["Rava 1/2 cup, rice flour 1/2 cup, maida 1/4 cup, water/buttermilk, cumin, crushed pepper, curry leaf, green chilli.","Whisk to a thin, runny batter and rest 15 min. Pour (don't spread) over a hot greased tawa from outside in to make lacy holes, drizzle oil and crisp before folding."],
+"neer dosa":["Raw rice 1 cup, grated coconut 1/4 cup, salt.","Soak rice 3-4 hrs, grind with coconut to a thin pourable batter. Pour and swirl thin on a hot tawa, cover briefly and cook one side (no flip); fold."],
+"adai":["Rice 1 cup, toor + chana + urad dal 3/4 cup total, red chilli, asafoetida, curry leaf.","Soak rice and dals 2-3 hrs, grind coarse with chilli and asafoetida; stir in curry leaf. Spread thick on a tawa, make a hole in the centre, drizzle oil and cook both sides crisp. Good with avial or jaggery."],
+"pesarattu":["Whole green gram 1 cup, green chilli, ginger, cumin.","Soak moong 4 hrs, grind with chilli, ginger and cumin to a dosa batter. Spread on a tawa, scatter chopped onion on top if liked, drizzle oil and cook crisp."],
+"uthappam":["Dosa batter, onion, tomato, green chilli, coriander.","Pour thick batter into a small round, sprinkle chopped onion-tomato-chilli on top, drizzle oil, cover and cook till the base is golden, then flip briefly."],
+"kuzhi paniyaram":["Idli/dosa batter, onion, green chilli, mustard, curry leaf.","Temper mustard, chilli, onion and curry leaf and mix into the batter. Heat a paniyaram pan with a little oil per cavity, fill with batter, cook till golden and flip to crisp both sides."],
+"ven pongal":["Raw rice 1 cup, moong dal 1/2 cup, pepper, cumin, ginger, cashew, ghee, curry leaf, asafoetida.","Lightly roast moong dal, then pressure-cook with rice and 4-5 cups water till soft. Temper crushed pepper, cumin, ginger, cashew, curry leaf and asafoetida in ghee and mix in. Add extra ghee to taste; serve with gotsu or chutney."],
+"rava idli":["Rava 1 cup, curd 1/2 cup, water, eno/soda, carrot, cashew, mustard, curry leaf.","Roast rava and cool; mix with curd and water to an idli batter, rest 15 min. Stir in tempering and grated carrot, add eno just before steaming and steam 10-12 min."],
+"idiyappam":["Rice flour 2 cups, hot water, salt, oil; stew: mixed veg, coconut milk, ginger, green chilli.","Make a soft dough with hot water and a little oil; press through an idiyappam mould onto idli plates and steam 5-7 min. For the stew, simmer veg with ginger and chilli, then finish with coconut milk."],
+"appam":["Raw rice 1 cup, cooked rice 1/4 cup, coconut, yeast or soda, sugar, salt.","Grind soaked rice with coconut and cooked rice to a smooth batter; add sugar and yeast and ferment 6-8 hrs. Pour into a hot appam pan and swirl for thin lacy edges with a soft centre, cover and cook."],
+"poha":["Thick poha 2 cups, onion, green chilli, peanuts, mustard, turmeric, curry leaf, lemon.","Rinse poha gently till just soft and drain. Temper mustard, peanuts, chilli, curry leaf and onion; add turmeric. Fold in the poha with salt and a pinch of sugar; finish with lemon and coriander."],
+"rava upma":["Rava 1 cup, water 2.5 cups, onion, green chilli, ginger, mustard, urad dal, curry leaf, ghee.","Dry-roast rava till aromatic. Temper mustard, urad dal, chilli, ginger, curry leaf and onion; add hot water and salt, then add rava slowly while stirring to avoid lumps. Cook covered till fluffy and finish with ghee."],
+"semiya upma":["Vermicelli 1.5 cups, water ~2 cups, mixed veg, mustard, urad dal, curry leaf, cashew.","Roast the vermicelli golden if not pre-roasted. Temper and sauté the veg, add measured hot water with salt, then the vermicelli; cook covered till the water is absorbed."],
+"veg sandwich":["Bread, cucumber, tomato, onion, boiled potato, green chutney, butter.","Butter the bread and spread green chutney, layer the sliced veg with salt and pepper, close and grill or toast till golden."],
+"bread toast":["Bread, besan 1/2 cup, water, turmeric, chilli powder, salt, oil.","Make a smooth besan batter with the spices. Dip the bread slices and shallow-fry on a tawa with a little oil till crisp on both sides."],
+"veg roll":["Paratha or roti, paneer or mixed veg, onion, capsicum, chaat masala, sauce.","Sauté paneer or veg with onion, capsicum and spices. Lay along a warm roti, add sauce, roll tight and toast the seam if you like."],
+"paratha":["Wheat dough, boiled potato or grated paneer, green chilli, coriander, spices, ghee.","Mix the filling with spices, stuff into a dough ball and roll gently. Roast on a tawa with ghee till golden-brown on both sides."],
+"veg cutlet":["Boiled potato, mixed veg, bread crumbs, green chilli, garam masala, salt.","Mash potato with finely chopped cooked veg and spices, shape into patties, coat in crumbs and shallow-fry till golden."],
+"veg pasta":["Pasta, capsicum, onion, tomato or white sauce, garlic, herbs, cheese.","Boil pasta al dente. Sauté garlic and veg, add red (tomato) or white (butter-flour-milk) sauce, toss the pasta and finish with herbs and cheese."],
+"veg noodles":["Noodles, cabbage, carrot, capsicum, spring onion, soy sauce, vinegar, pepper.","Boil noodles, drain and oil lightly. Stir-fry shredded veg on high heat, add the sauces and noodles, toss quickly and finish with spring onion."],
+"oats":["Oats, milk or water, fruit, nuts, honey.","Cook oats in milk or water 3-4 min till creamy (or soak overnight). Top with chopped fruit, nuts and a little honey."],
+"besan chilla":["Besan 1 cup, water, onion, tomato, green chilli, coriander, turmeric, salt.","Whisk besan with water and spices to a pourable batter and mix in the chopped veg. Pour on a hot tawa, spread, drizzle oil and cook both sides."],
+"mini idli":["Idli batter, gingelly oil, idli podi or sambar.","Steam mini idlis. Toss in podi mixed with oil or ghee, or dunk them in warm sambar."],
+"potato rice":["Cooked rice, potato, onion, turmeric, chilli powder, mustard, curry leaf.","Sauté cubed boiled potato with a mustard tempering, turmeric and chilli till slightly crisp; fold into cooked rice with salt."],
+"bhindi rice":["Cooked rice, okra, turmeric, chilli powder, mustard, curry leaf.","Dry-fry sliced okra till crisp, then toss with cooked rice, a quick tempering and the spices."],
+"lemon rice":["Cooked rice, lemon, mustard, chana + urad dal, peanuts, green chilli, turmeric, curry leaf.","Temper mustard, dals, peanuts, chilli, curry leaf and turmeric; switch off the heat, add lemon juice and salt, then fold into cooled rice."],
+"curd rice":["Cooked rice, curd, milk, mustard, ginger, green chilli, curry leaf, coriander.","Mash warm rice slightly and mix with curd, a little milk and salt. Temper mustard, ginger, chilli and curry leaf and stir through; add grated carrot or pomegranate if liked."],
+"tomato rice":["Cooked rice, tomato, onion, ginger-garlic, chilli powder, garam masala, curry leaf.","Cook a thick tomato masala with onion and spices till the oil separates, then fold in cooked rice with salt."],
+"veg fried rice":["Cooked, cooled rice, carrot, beans, capsicum, spring onion, soy sauce, pepper.","On high heat stir-fry the chopped veg, add the cold rice, soy sauce, pepper and salt; toss quickly and finish with spring onion."],
+"jam/honey chapathi roll":["Soft chapathi, jam or honey, butter.","Spread butter and jam or honey on a soft chapathi, roll it up and cut into pinwheels."],
+"sambar rice":["Rice, toor dal, mixed veg, tamarind, sambar powder, tomato, mustard, curry leaf, asafoetida, ghee.","Pressure-cook rice and dal soft. Cook the veg with tamarind extract, sambar powder and tomato; add the mashed dal and rice and simmer to a soft texture. Finish with a ghee tempering."],
+"rasam rice":["Toor dal, tomato, tamarind, rasam powder, pepper-cumin, garlic, curry leaf, coriander.","Simmer tamarind extract with tomato, rasam powder and crushed pepper-cumin; add thin dal water and heat till frothy (don't boil hard). Temper and mix with rice."],
+"tamarind rice":["Cooked rice, tamarind, sesame oil, mustard, chana + urad dal, peanuts, dry chilli, turmeric, asafoetida, fenugreek powder, jaggery.","Make pulikachal: in sesame oil temper the dals, peanuts and chilli, add thick tamarind extract, turmeric, salt and a little jaggery, and cook till thick and the oil separates. Mix the needed amount into cooled rice and rest 30 min."],
+"coconut rice":["Cooked rice, grated coconut, mustard, chana + urad dal, cashew, green chilli, ginger, curry leaf.","Temper the dals, cashew, chilli, ginger and curry leaf; add grated coconut and sauté 2 min, then fold into the rice with salt."],
+"coriander / mint rice":["Cooked rice, coriander + mint, green chilli, ginger, garlic, coconut, whole spices.","Grind coriander, mint, chilli and ginger to a paste. Temper whole spices, sauté the paste till the raw smell goes, then fold in the rice and salt."],
+"bisibelebath":["Rice, toor dal, mixed veg, tamarind, bisibele bath powder, tomato, ghee, cashew.","Cook rice and dal soft. Cook the veg with tamarind, tomato and bisibele powder, combine with the rice and dal with enough water for a soft consistency, and finish with ghee-fried cashew."],
+"vegetable pulao":["Basmati rice, mixed veg, onion, whole spices (bay, clove, cardamom, cinnamon), ginger-garlic, mint.","Sauté the whole spices and onion, add ginger-garlic, veg and mint, then the washed rice with 1.5x water and salt. Pressure-cook 2 whistles or cook covered till done."],
+"vatha kuzhambu":["Tamarind, sambar powder, sun-dried vathal (sundakkai/manathakkali), sesame oil, mustard, fenugreek, curry leaf, asafoetida, jaggery.","In sesame oil temper mustard, fenugreek, curry leaf and the vathal; add tamarind extract, sambar powder, salt and a little jaggery and simmer till thick and the oil floats. Serve over rice."],
+"mor kuzhambu":["Sour curd, coconut, cumin, green chilli, ginger, ash gourd or okra, turmeric, mustard, curry leaf.","Grind coconut, cumin, chilli and ginger to a paste. Cook the chosen veg soft, add the paste and turmeric, then whisked curd; heat gently without boiling and finish with a tempering."],
+"channa masala":["Kabuli chana, onion, tomato, ginger-garlic, chana masala, chilli powder, oil.","Soak and pressure-cook the chana soft. Sauté onion and ginger-garlic, add tomato and spices till the oil separates, then the chana with a little stock; simmer till thick."],
+"paneer butter masala":["Paneer, tomato, cashew, butter, cream, ginger-garlic, chilli powder, kasuri methi, garam masala.","Cook tomato with cashew and ginger-garlic and blend smooth. Cook the puree in butter with chilli powder and salt, add cream, kasuri methi and paneer cubes and simmer 5 min."],
+"paneer mutter":["Paneer, green peas, onion, tomato, ginger-garlic, chilli powder, garam masala.","Make an onion-tomato masala, add peas with a little water and cook soft, then add paneer and garam masala and simmer 5 min."],
+"bhindi masala":["Okra, onion, tomato, chilli powder, coriander powder, amchur, oil.","Sauté sliced okra till the stickiness goes and the edges crisp; set aside. Cook onion and tomato with the spices, return the okra, toss and finish with amchur."],
+"aloo gobi":["Potato, cauliflower, onion, tomato, ginger, turmeric, chilli powder, garam masala.","Sauté ginger and onion, add potato and cauliflower with turmeric, chilli and salt and cook covered till tender; add tomato and garam masala and dry off the moisture."],
+"dal tadka":["Toor or moong dal, tomato, onion, garlic, cumin, dry chilli, ghee, coriander.","Pressure-cook the dal with turmeric, tomato and salt and mash. Make a ghee tadka of cumin, garlic, dry chilli and chilli powder and pour over the dal; simmer briefly."],
+"rajma":["Rajma, onion, tomato, ginger-garlic, chilli powder, coriander powder, garam masala.","Soak overnight and pressure-cook the rajma soft. Cook an onion-tomato-ginger-garlic masala with the spices, add the rajma with stock and simmer till thick and creamy."],
+"veg kurma":["Mixed veg, onion, tomato, coconut, cashew, green chilli, ginger-garlic, whole spices.","Grind coconut, cashew and chilli to a paste. Sauté whole spices, onion, ginger-garlic and tomato, add the veg with water and cook soft, then stir in the paste and simmer."],
+"mixed veg curry":["Mixed vegetables, onion, tomato, ginger-garlic, turmeric, chilli powder, coriander powder, garam masala.","Make an onion-tomato base with the spices, add the chopped veg and a little water and cook covered till tender; finish with garam masala and coriander."],
+"poori":["Wheat flour, a pinch of semolina, salt, water, oil; bhaji: potato, onion, turmeric, mustard, green chilli.","Knead a stiff dough and rest, roll small discs and deep-fry, pressing gently so they puff. For the bhaji, temper mustard and chilli, add onion and mashed boiled potato with turmeric and water to a soft mash."],
+"semiya pulao":["Roasted vermicelli, mixed veg, onion, whole spices, mint.","Sauté whole spices, onion and veg, add the vermicelli with 2x hot water and salt and cook covered till absorbed."],
+"chutney pulav":["Rice, coriander-mint-coconut chutney, onion, whole spices.","Grind a green chutney. Sauté whole spices and onion, add the chutney and cook off the raw smell, then add cooked rice (or raw rice with water) and salt."],
+"gobi manchurian":["Cauliflower, cornflour + maida, ginger-garlic, spring onion, soy & green chilli sauce, vinegar.","Coat florets in a spiced cornflour-maida batter and fry crisp. Toss in a sauce of ginger-garlic, soy, chilli sauce, vinegar and a little cornflour slurry; finish with spring onion."],
+"chilli paneer":["Paneer, capsicum, onion, ginger-garlic, soy & chilli sauce, vinegar, cornflour.","Lightly fry cornflour-coated paneer. Stir-fry onion and capsicum with ginger-garlic, add the sauces and a slurry, then toss in the paneer till coated."],
+"schezwan fried rice":["Cooked rice, schezwan sauce, mixed veg, spring onion, soy sauce.","Stir-fry the veg on high heat, add schezwan sauce and the cooked rice with a dash of soy; toss and finish with spring onion."],
+"white sauce pasta":["Pasta, butter, flour, milk, cheese, garlic, herbs, veg.","Make a roux with butter and flour, whisk in milk to a smooth sauce, add cheese, herbs and salt, then toss with boiled pasta and sautéed veg."],
+"veg pizza":["Pizza base, pizza/tomato sauce, cheese, capsicum, onion, corn, herbs.","Spread sauce on the base, top with cheese and veg, and bake hot (or cook covered on a tawa) till the cheese melts and the base crisps."],
+"pav bhaji":["Pav, potato, peas, capsicum, onion, tomato, pav bhaji masala, butter.","Boil and mash potato and peas. Cook onion, tomato and capsicum with pav bhaji masala and butter, add the mash with water to a thick bhaji; toast buttered pav and serve."],
+"beans poriyal":["Beans, grated coconut, mustard, urad dal, green chilli, curry leaf.","Sauté or steam chopped beans with a little water till tender. Temper mustard, urad dal, chilli and curry leaf, toss and finish with grated coconut."],
+"carrot poriyal":["Carrot, grated coconut, mustard, urad dal, green chilli, curry leaf.","Sauté grated/chopped carrot with a mustard-urad tempering and a little water till tender; finish with coconut."],
+"beetroot poriyal":["Beetroot, grated coconut, mustard, urad dal, green chilli, curry leaf.","Cook grated beetroot covered with a little water till soft; temper and finish with coconut."],
+"potato roast":["Potato, turmeric, chilli powder, mustard, curry leaf, oil.","Boil and cube potato, then pan-roast with a tempering, turmeric and chilli powder on low heat till crisp."],
+"cabbage poriyal":["Cabbage, grated coconut, mustard, urad dal, green chilli, curry leaf.","Stir-fry shredded cabbage with a tempering and chilli till just tender; finish with coconut."],
+"gobi fry":["Cauliflower, turmeric, chilli powder, curry leaf, oil.","Sauté florets with turmeric, chilli and salt on medium heat till the edges brown."],
+"vendakkai poriyal":["Okra, mustard, urad dal, green chilli, curry leaf, oil.","Dry-fry sliced okra with a light tempering on medium heat till crisp, stirring often."],
+"kathirikai curry":["Brinjal, onion, tomato, sambar/curry powder, mustard, curry leaf.","Sauté onion, add cubed brinjal and tomato with the spice powder and a splash of water; cook covered till soft."],
+"chow chow kootu":["Chow chow, moong dal, coconut, cumin, green chilli, turmeric.","Cook the chow chow with moong dal and turmeric till soft; add a ground coconut-cumin-chilli paste, simmer and finish with a tempering."],
+"pudalangai kootu":["Snake gourd, moong dal, coconut, cumin, green chilli, turmeric.","Cook the snake gourd with moong dal and turmeric soft; add a coconut-cumin-chilli paste, simmer and temper."],
+"vazhakkai fry":["Raw banana, turmeric, chilli powder, mustard, curry leaf.","Boil raw banana slices, then pan-roast with a tempering, turmeric and chilli powder till golden."],
+"keerai poriyal":["Spinach/keerai, moong dal, coconut, mustard, garlic/chilli.","Wilt the greens, temper, add cooked moong dal and finish with grated coconut."],
+"capsicum fry":["Capsicum, besan, chilli powder, mustard, curry leaf.","Toss capsicum with a tempering and spices, sprinkle besan and cook till dry and coated."],
+"green peas masala":["Green peas, onion, tomato, ginger-garlic, chilli powder, garam masala.","Make a light onion-tomato masala, add peas with a little water and simmer till soft."],
+"tomato thokku":["Tomato, sesame oil, chilli powder, mustard, fenugreek, turmeric, salt.","Cook chopped tomato in sesame oil with chilli powder, turmeric and salt till thick and jam-like; finish with a mustard-fenugreek tempering."],
+"cucumber pachadi":["Cucumber, curd, green chilli, mustard, curry leaf, salt.","Grate cucumber and squeeze lightly; mix with whisked curd and salt, then finish with a mustard-chilli tempering."],
+"coconut & onion chutney":["Coconut, roasted gram (pottukadalai), green chilli, ginger, onion, salt; tempering: mustard, urad dal, curry leaf.","Grind coconut, roasted gram, chilli, ginger and sautéed onion with water to a smooth chutney; finish with a mustard-urad-curry leaf tempering. Skip onion for a satvik version."]
+};
+function rkey(name){return name.toLowerCase().replace(/\(.*?\)/g,"").split(" + ")[0].replace(/\s+/g," ").trim();}
+function getRecipe(name){const k=rkey(name);
+  return RECIPES[k]||RECIPES[k.replace(" hakka","")]||(k.indexOf("chutney")>=0?RECIPES["coconut & onion chutney"]:null)||null;}
 
 const VEG=["Onion","Beans","Carrot","Beetroot","Potato","Cabbage","Cauliflower","Okra (bhindi)","Brinjal","Chow chow","Snake gourd","Raw banana","Drumstick","Peas","Capsicum","Spinach (keerai)","Tomato","Cucumber","Paneer"];
 const SIDE={
@@ -423,11 +512,11 @@ function generate(){
   current={bf,kid,snack,lunch,side,dinner,noog,prep,notes:$("#notes").value.trim(),chutney:bf.chutney,chutLabel:noog?"Coconut chutney":"Coconut & onion chutney"};
   render(current);
 }
-function linksHtml(link,name,noRecipe){let h='<div class="links">';
-  if(link){const fnd=!link.id;h+=`<a class="lnk ${fnd?'find':'yt'}" target="_blank" rel="noopener" href="${linkURL(link)}">${fnd?'🔎 Find video':'▶ Watch'} <small>· ${linkLabel(link)}</small></a>`;}
-  if(!noRecipe)h+=`<a class="lnk recipe" target="_blank" rel="noopener" href="${recipeURL(name)}">📖 Recipe <small>· Padhu's</small></a>`;
-  return h+'</div>';}
-function item(k,name,how,link,flag,noRecipe){return `<div class="item"><div class="k">${k}</div><div class="name">${name}${flag?'<span class="flag">⏱ prep</span>':''}</div><div class="how">${how}</div>${(link||!noRecipe)?linksHtml(link,name,noRecipe):''}</div>`;}
+function linksHtml(link){if(!link)return"";const fnd=!link.id;
+  return `<div class="links"><a class="lnk ${fnd?'find':'yt'}" target="_blank" rel="noopener" href="${linkURL(link)}">${fnd?'🔎 Find video':'▶ Watch'} <small>· ${linkLabel(link)}</small></a></div>`;}
+function recipeHtml(name){const r=getRecipe(name);if(!r)return"";
+  return `<details class="rec"><summary>📖 Recipe (text)</summary><div class="recbox"><h5>Ingredients</h5><p>${escapeHtml(r[0])}</p><h5>Method</h5><p>${escapeHtml(r[1])}</p></div></details>`;}
+function item(k,name,how,link,flag,noRecipe){return `<div class="item"><div class="k">${k}</div><div class="name">${name}${flag?'<span class="flag">⏱ prep</span>':''}</div><div class="how">${how}</div>${linksHtml(link)}${noRecipe?'':recipeHtml(name)}</div>`;}
 function render(p){
   const today=new Date().toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long'});
   let h=`<div class="plan-head"><div class="d">Today's tiffins</div><h2>${today}</h2></div>`;
@@ -443,7 +532,7 @@ function render(p){
 }
 function escapeHtml(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function planText(){const p=current;if(!p)return"";const today=new Date().toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long'});
-  const L=(name,link)=>{let s="";if(link)s+="\n   "+(link.id?"▶ ":"🔎 ")+linkLabel(link)+": "+linkURL(link);s+="\n   📖 Recipe: "+recipeURL(name);return s;};
+  const L=(name,link)=>link?("\n   "+(link.id?"▶ ":"🔎 ")+linkLabel(link)+": "+linkURL(link)):"";
   let t=`🍲 OUR COOK ASSIST — ${today}\n`;if(p.noog)t+=`(no onion & garlic)\n`;if(p.prep)t+=`⏱ Prep ahead: ${p.prep.label} — ${p.prep.note}\n`;if(p.notes)t+=`Note: ${p.notes}\n`;
   t+=`\n👦 DHRUV (ready by 6:00)\n• Meal: ${p.kid.label}${L(p.kid.label,p.kid.link)}\n• Snack: ${p.snack[0]}\n`;
   t+=`\n👩‍🍳 DWARA & MEERA (carry)\n• Breakfast: ${p.bf.label}${L(p.bf.label,p.bf.link)}\n`;if(p.chutney)t+=`   + ${p.chutLabel}\n`;
@@ -463,7 +552,12 @@ function sharePDF(){const p=current;if(!p){toast("Make a plan first");return;}
   function sec(t){ck();doc.setFont("helvetica","bold");doc.setFontSize(13);doc.setTextColor(28,93,58);doc.text(t,M,y);y+=18;}
   function dish(name,link,noRecipe){ck();doc.setFont("helvetica","bold");doc.setFontSize(11.5);doc.setTextColor(35,29,17);doc.text("• "+name,M+6,y);y+=15;
     if(link){doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(40,90,170);doc.textWithLink((link.id?"Watch video":"Find video")+" ("+linkLabel(link)+")",M+16,y,{url:linkURL(link)});y+=13;}
-    if(!noRecipe){doc.setFontSize(9.5);doc.setTextColor(150,90,20);doc.textWithLink("Recipe — Padhu's Kitchen",M+16,y,{url:recipeURL(name)});y+=13;}y+=6;doc.setTextColor(40,40,40);}
+    if(!noRecipe){const r=getRecipe(name);if(r){
+      doc.setFont("helvetica","bold");doc.setFontSize(9);doc.setTextColor(122,106,31);ck();doc.text("Ingredients:",M+16,y);y+=12;
+      doc.setFont("helvetica","normal");doc.setTextColor(70,70,70);doc.splitTextToSize(r[0],500).forEach(ln=>{ck();doc.text(ln,M+16,y);y+=11;});
+      doc.setFont("helvetica","bold");doc.setTextColor(122,106,31);ck();doc.text("Method:",M+16,y);y+=12;
+      doc.setFont("helvetica","normal");doc.setTextColor(70,70,70);doc.splitTextToSize(r[1],500).forEach(ln=>{ck();doc.text(ln,M+16,y);y+=11;});}}
+    y+=8;doc.setTextColor(40,40,40);}
   if(p.noog)banner("No onion & garlic");if(p.prep)banner("Prep ahead: "+p.prep.label+" — "+p.prep.note);if(p.notes)banner("Note: "+p.notes);
   sec("DHRUV — ready by 6:00");dish(p.kid.label,p.kid.link);ck();doc.setFont("helvetica","normal");doc.setFontSize(10.5);doc.setTextColor(60,60,60);doc.text("Snack: "+p.snack[0],M+6,y);y+=20;
   sec("DWARA & MEERA — carry");dish(p.bf.label,p.bf.link);if(p.chutney){doc.setFontSize(10);doc.setTextColor(60,60,60);doc.text("with "+p.chutLabel,M+10,y);y+=16;}
